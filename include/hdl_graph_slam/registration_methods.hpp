@@ -14,7 +14,7 @@ public:
 
   void draw_ui();
 
-  pcl::Registration<pcl::PointXYZI, pcl::PointXYZI>::Ptr method() const;
+  pcl::Registration<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr method() const;
 
 private:
   int registration_method;

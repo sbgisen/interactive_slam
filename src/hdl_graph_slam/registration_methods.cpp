@@ -26,12 +26,12 @@ void RegistrationMethods::draw_ui() {
   ImGui::DragInt("Max iterations", &max_iterations, 1, 1, 256);
 }
 
-pcl::Registration<pcl::PointXYZI, pcl::PointXYZI>::Ptr RegistrationMethods::method() const {
-  pcl::Registration<pcl::PointXYZI, pcl::PointXYZI>::Ptr registration;
+pcl::Registration<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr RegistrationMethods::method() const {
+  pcl::Registration<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr registration;
 
   switch(registration_method) {
     case 0: {
-      auto icp = pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>::Ptr(new pcl::IterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>);
+      auto icp = pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr(new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>);
       registration = icp;
     } break;
 
@@ -39,29 +39,29 @@ pcl::Registration<pcl::PointXYZI, pcl::PointXYZI>::Ptr RegistrationMethods::meth
       std::cerr << "warning: unknown registration method!!" << std::endl;
       std::cerr << "       : use GICP" << std::endl;
     case 1: {
-      auto gicp = pcl::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>::Ptr(new pcl::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>);
+      auto gicp = pcl::GeneralizedIterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr(new pcl::GeneralizedIterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>);
       registration = gicp;
     } break;
 
     case 2: {
-      auto ndt = pcl::NormalDistributionsTransform<pcl::PointXYZI, pcl::PointXYZI>::Ptr(new pcl::NormalDistributionsTransform<pcl::PointXYZI, pcl::PointXYZI>);
+      auto ndt = pcl::NormalDistributionsTransform<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr(new pcl::NormalDistributionsTransform<pcl::PointXYZRGB, pcl::PointXYZRGB>);
       ndt->setResolution(registration_resolution);
       registration = ndt;
     } break;
 
     case 3: {
-      auto gicp = pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>::Ptr(new pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZI, pcl::PointXYZI>);
+      auto gicp = pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr(new pclomp::GeneralizedIterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>);
       registration = gicp;
     } break;
 
     case 4: {
-      auto ndt = pclomp::NormalDistributionsTransform<pcl::PointXYZI, pcl::PointXYZI>::Ptr(new pclomp::NormalDistributionsTransform<pcl::PointXYZI, pcl::PointXYZI>);
+      auto ndt = pclomp::NormalDistributionsTransform<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr(new pclomp::NormalDistributionsTransform<pcl::PointXYZRGB, pcl::PointXYZRGB>);
       ndt->setResolution(registration_resolution);
       registration = ndt;
     } break;
 
     case 5: {
-      fast_gicp::FastVGICP<pcl::PointXYZI, pcl::PointXYZI>::Ptr vgicp(new fast_gicp::FastVGICP<pcl::PointXYZI, pcl::PointXYZI>());
+      fast_gicp::FastVGICP<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr vgicp(new fast_gicp::FastVGICP<pcl::PointXYZRGB, pcl::PointXYZRGB>());
       vgicp->setNumThreads(0);
       vgicp->setResolution(1.0);
       vgicp->setCorrespondenceRandomness(20);

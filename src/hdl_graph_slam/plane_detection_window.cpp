@@ -56,7 +56,7 @@ void PlaneDetectionWindow::close() {
 
 RegionGrowingResult::Ptr PlaneDetectionWindow::region_growing(guik::ProgressInterface& progress) {
   RegionGrowingResult::Ptr result(new RegionGrowingResult());
-  pcl::PointCloud<pcl::PointXYZI>::Ptr accumulated_points(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr accumulated_points(new pcl::PointCloud<pcl::PointXYZRGB>());
 
   progress.set_maximum(5);
   progress.set_text("accumulating points");
@@ -69,7 +69,7 @@ RegionGrowingResult::Ptr PlaneDetectionWindow::region_growing(guik::ProgressInte
 
     result->candidates.push_back(keyframe.second);
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::transformPointCloud(*keyframe.second->cloud, *cloud, keyframe.second->node->estimate().cast<float>());
 
     if (accumulated_points->empty()) {
@@ -90,9 +90,9 @@ RegionGrowingResult::Ptr PlaneDetectionWindow::region_growing(guik::ProgressInte
   progress.set_text("normal estimation");
   progress.increment();
   pcl::PointCloud<pcl::Normal>::Ptr accumulated_normals(new pcl::PointCloud<pcl::Normal>());
-  pcl::NormalEstimationOMP<pcl::PointXYZI, pcl::Normal> ne;
+  pcl::NormalEstimationOMP<pcl::PointXYZRGB, pcl::Normal> ne;
 
-  pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>());
+  pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZRGB>());
   ne.setInputCloud(accumulated_points);
   ne.setSearchMethod(tree);
   ne.setRadiusSearch(normal_estimation_radius);
@@ -101,11 +101,11 @@ RegionGrowingResult::Ptr PlaneDetectionWindow::region_growing(guik::ProgressInte
 
   progress.set_text("region growing");
   progress.increment();
-  pcl::RegionGrowing<pcl::PointXYZI, pcl::Normal> reg;
+  pcl::RegionGrowing<pcl::PointXYZRGB, pcl::Normal> reg;
   reg.setMinClusterSize(min_cluster_size);
   reg.setMaxClusterSize(max_cluster_size);
 
-  pcl::search::KdTree<pcl::PointXYZI>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZI>());
+  pcl::search::KdTree<pcl::PointXYZRGB>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZRGB>());
   kdtree->setInputCloud(accumulated_points);
   reg.setSearchMethod(kdtree);
 
@@ -118,12 +118,12 @@ RegionGrowingResult::Ptr PlaneDetectionWindow::region_growing(guik::ProgressInte
   pcl::PointIndices::Ptr cluster(new pcl::PointIndices());
   reg.getSegmentFromPoint(0, *cluster);
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr extracted_cloud(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr extracted_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
   pcl::PointCloud<pcl::Normal>::Ptr extracted_normals(new pcl::PointCloud<pcl::Normal>());
 
   progress.set_text("extract indices");
   progress.increment();
-  pcl::ExtractIndices<pcl::PointXYZI> extract;
+  pcl::ExtractIndices<pcl::PointXYZRGB> extract;
   extract.setInputCloud(accumulated_points);
   extract.setIndices(cluster);
   extract.setNegative(false);
@@ -137,7 +137,7 @@ RegionGrowingResult::Ptr PlaneDetectionWindow::region_growing(guik::ProgressInte
 
   if(enable_normal_filtering) {
     progress.set_text("normal filtering");
-    result->cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
+    result->cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     result->normals.reset(new pcl::PointCloud<pcl::Normal>());
 
     for(int i = 0; i < extracted_cloud->size(); i++) {
@@ -167,8 +167,8 @@ RegionGrowingResult::Ptr PlaneDetectionWindow::region_growing(guik::ProgressInte
 }
 
 PlaneDetectionResult::Ptr PlaneDetectionWindow::detect_plane(const RegionGrowingResult::Ptr& rg_result) {
-  pcl::SampleConsensusModelPlane<pcl::PointXYZI>::Ptr model_p(new pcl::SampleConsensusModelPlane<pcl::PointXYZI>(rg_result->cloud));
-  pcl::RandomSampleConsensus<pcl::PointXYZI> ransac(model_p);
+  pcl::SampleConsensusModelPlane<pcl::PointXYZRGB>::Ptr model_p(new pcl::SampleConsensusModelPlane<pcl::PointXYZRGB>(rg_result->cloud));
+  pcl::RandomSampleConsensus<pcl::PointXYZRGB> ransac(model_p);
   ransac.setDistanceThreshold(ransac_distance_thresh);
   ransac.computeModel();
 
@@ -204,8 +204,8 @@ PlaneDetectionResult::Ptr PlaneDetectionWindow::detect_plane(const RegionGrowing
   return result;
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr PlaneDetectionWindow::detect_plane_with_coeffs(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& cloud, Eigen::Vector4f& coeffs) {
-  pcl::SampleConsensusModelPlane<pcl::PointXYZI>::Ptr model_p(new pcl::SampleConsensusModelPlane<pcl::PointXYZI>(cloud));
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr PlaneDetectionWindow::detect_plane_with_coeffs(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& cloud, Eigen::Vector4f& coeffs) {
+  pcl::SampleConsensusModelPlane<pcl::PointXYZRGB>::Ptr model_p(new pcl::SampleConsensusModelPlane<pcl::PointXYZRGB>(cloud));
   pcl::PointIndices::Ptr init_indices(new pcl::PointIndices);
   model_p->selectWithinDistance(coeffs, ransac_distance_thresh, init_indices->indices);
 
@@ -213,15 +213,15 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr PlaneDetectionWindow::detect_plane_with_coe
     return nullptr;
   }
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr init_inliers(new pcl::PointCloud<pcl::PointXYZI>());
-  pcl::ExtractIndices<pcl::PointXYZI> extract;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr init_inliers(new pcl::PointCloud<pcl::PointXYZRGB>());
+  pcl::ExtractIndices<pcl::PointXYZRGB> extract;
   extract.setInputCloud(cloud);
   extract.setIndices(init_indices);
   extract.setNegative(false);
   extract.filter(*init_inliers);
 
-  model_p.reset(new pcl::SampleConsensusModelPlane<pcl::PointXYZI>(init_inliers));
-  pcl::RandomSampleConsensus<pcl::PointXYZI> ransac(model_p);
+  model_p.reset(new pcl::SampleConsensusModelPlane<pcl::PointXYZRGB>(init_inliers));
+  pcl::RandomSampleConsensus<pcl::PointXYZRGB> ransac(model_p);
   ransac.setDistanceThreshold(ransac_distance_thresh);
   ransac.computeModel();
 
@@ -236,7 +236,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr PlaneDetectionWindow::detect_plane_with_coe
   pcl::PointIndices::Ptr indices(new pcl::PointIndices());
   ransac.getInliers(indices->indices);
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr inliers(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr inliers(new pcl::PointCloud<pcl::PointXYZRGB>());
   extract.setInputCloud(init_inliers);
   extract.setIndices(indices);
   extract.filter(*inliers);

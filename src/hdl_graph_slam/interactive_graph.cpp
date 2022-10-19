@@ -505,11 +505,11 @@ bool InteractiveGraph::save_pointcloud(const std::string& filename, guik::Progre
   progress.set_maximum(keyframes.size() + 1);
   progress.set_text("accumulate points");
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr accumulated(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr accumulated(new pcl::PointCloud<pcl::PointXYZRGB>());
   for(const auto& keyframe : keyframes) {
     progress.increment();
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr transformed(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::transformPointCloud(*keyframe.second->cloud, *transformed, keyframe.second->node->estimate().cast<float>());
 
     std::copy(transformed->begin(), transformed->end(), std::back_inserter(accumulated->points));

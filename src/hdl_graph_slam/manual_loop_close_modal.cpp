@@ -324,12 +324,12 @@ void ManualLoopCloseModal::scan_matching() {
     robust_kernel.draw_ui();
 
     if (ImGui::Button("OK")) {
-      pcl::Registration<pcl::PointXYZI, pcl::PointXYZI>::Ptr registration = registration_method.method();
+      pcl::Registration<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr registration = registration_method.method();
 
       registration->setInputTarget(begin_keyframe->lock()->cloud);
       registration->setInputSource(end_keyframe->lock()->cloud);
 
-      pcl::PointCloud<pcl::PointXYZI>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZI>());
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZRGB>());
       Eigen::Isometry3d relative = begin_keyframe_pose.inverse() * end_keyframe_pose;
       registration->align(*aligned, relative.matrix().cast<float>());
 

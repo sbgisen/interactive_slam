@@ -12,7 +12,7 @@ namespace hdl_graph_slam {
 InteractiveKeyFrame::InteractiveKeyFrame(const std::string& directory, g2o::HyperGraph* graph)
 : KeyFrame(directory, graph)
 {
-  pcl::search::KdTree<pcl::PointXYZI>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZI>());
+  pcl::search::KdTree<pcl::PointXYZRGB>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZRGB>());
   kdtree->setInputCloud(cloud);
   kdtree_ = kdtree;
 }
@@ -22,12 +22,12 @@ InteractiveKeyFrame::~InteractiveKeyFrame() {
 }
 
 std::vector<int> InteractiveKeyFrame::neighbors(const Eigen::Vector3f& pt, double radius) {
-  pcl::search::KdTree<pcl::PointXYZI>::Ptr kdtree = boost::any_cast<pcl::search::KdTree<pcl::PointXYZI>::Ptr>(kdtree_);
+  pcl::search::KdTree<pcl::PointXYZRGB>::Ptr kdtree = boost::any_cast<pcl::search::KdTree<pcl::PointXYZRGB>::Ptr>(kdtree_);
 
   std::vector<int> indices;
   std::vector<float> squared_distances;
 
-  pcl::PointXYZI p;
+  pcl::PointXYZRGB p;
   p.getVector4fMap() = node->estimate().inverse().cast<float>() * Eigen::Vector4f(pt[0], pt[1], pt[2], 1.0f);
   kdtree->radiusSearch(p, radius, indices, squared_distances);
 
@@ -38,9 +38,9 @@ pcl::PointCloud<pcl::Normal>::Ptr InteractiveKeyFrame::normals() {
   if (!normals_) {
     normals_.reset(new pcl::PointCloud<pcl::Normal>());
 
-    pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> ne;
+    pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> ne;
 
-    pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>());
+    pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZRGB>());
     ne.setInputCloud(cloud);
     ne.setSearchMethod(tree);
     ne.setRadiusSearch(0.25f);

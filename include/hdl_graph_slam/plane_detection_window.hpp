@@ -18,7 +18,7 @@ public:
 
   std::vector<InteractiveKeyFrame::Ptr> candidates;
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
   pcl::PointCloud<pcl::Normal>::Ptr normals;
   glk::PointCloudBuffer::Ptr cloud_buffer;
 };
@@ -28,7 +28,7 @@ public:
   using Ptr = std::shared_ptr<PlaneDetectionResult>;
 
   std::vector<InteractiveKeyFrame::Ptr> candidates;
-  std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> candidate_inliers;
+  std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> candidate_inliers;
   std::vector<glk::PointCloudBuffer::Ptr> candidate_inlier_buffers;
   std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> candidate_local_coeffs;
 
@@ -48,7 +48,7 @@ public:
 
   RegionGrowingResult::Ptr region_growing(guik::ProgressInterface& progress);
   PlaneDetectionResult::Ptr detect_plane(const RegionGrowingResult::Ptr& region_growing);
-  pcl::PointCloud<pcl::PointXYZI>::Ptr detect_plane_with_coeffs(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& cloud, Eigen::Vector4f& coeffs);
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr detect_plane_with_coeffs(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& cloud, Eigen::Vector4f& coeffs);
 
   void draw_ui();
   void draw_gl(glk::GLSLShader& shader);

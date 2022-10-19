@@ -70,16 +70,16 @@ public:
     return std::make_shared<OdometryFrame>(cloud_filename, pose, stamp_sec, stamp_usec);
   }
 
-  const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud() {
+  const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud() {
     return cloud(downsample_resolution);
   }
 
-  const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud(float downsample_resolution) {
+  const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud(float downsample_resolution) {
     if(cloud_ == nullptr || std::abs(this->downsample_resolution - downsample_resolution) > 0.01f) {
-      pcl::PointCloud<pcl::PointXYZI>::Ptr raw_cloud = load_cloud(raw_cloud_path);
-      pcl::PointCloud<pcl::PointXYZI>::Ptr downsampled(new pcl::PointCloud<pcl::PointXYZI>());
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr raw_cloud = load_cloud(raw_cloud_path);
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr downsampled(new pcl::PointCloud<pcl::PointXYZRGB>());
 
-      pcl::VoxelGrid<pcl::PointXYZI> voxel_grid;
+      pcl::VoxelGrid<pcl::PointXYZRGB> voxel_grid;
       voxel_grid.setLeafSize(downsample_resolution, downsample_resolution, downsample_resolution);
       voxel_grid.setInputCloud(raw_cloud);
       voxel_grid.filter(*downsampled);
@@ -107,10 +107,10 @@ public:
     shader.set_uniform("apply_keyframe_scale", false);
   }
 private:
-  pcl::PointCloud<pcl::PointXYZI>::Ptr load_cloud(const std::string& filename) const {
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr load_cloud(const std::string& filename) const {
     std::string extension = boost::filesystem::path(filename).extension().string();
     if(extension == ".pcd") {
-      pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
       pcl::io::loadPCDFile(filename, *cloud);
       return cloud;
     } else if (extension == ".txt") {
@@ -120,7 +120,7 @@ private:
         return nullptr;
       }
 
-      pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>());
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
       while(!ifs.eof()) {
         std::string line;
         std::getline(ifs, line);
@@ -130,8 +130,9 @@ private:
 
         std::stringstream sst(line);
 
-        pcl::PointXYZI pt;
-        sst >> pt.x >> pt.y >> pt.z >> pt.intensity;
+        pcl::PointXYZRGB pt;
+        // sst >> pt.x >> pt.y >> pt.z >> pt.intensity;
+        sst >> pt.x >> pt.y >> pt.z >> pt.rgb;
 
         cloud->push_back(pt);
       }
@@ -157,7 +158,7 @@ public:
 
 private:
   float downsample_resolution;
-  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
 
   std::unique_ptr<glk::PointCloudBuffer> cloud_buffer;
 };

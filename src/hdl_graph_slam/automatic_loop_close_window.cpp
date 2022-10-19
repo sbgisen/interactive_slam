@@ -67,7 +67,7 @@ void AutomaticLoopCloseWindow::draw_ui() {
 }
 
 void AutomaticLoopCloseWindow::loop_detection() {
-  pcl::Registration<pcl::PointXYZI, pcl::PointXYZI>::Ptr registration = registration_method.method();
+  pcl::Registration<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr registration = registration_method.method();
 
   while (running) {
     KeyFrameView::Ptr source = graph->keyframes_view[loop_detection_source];
@@ -85,7 +85,7 @@ void AutomaticLoopCloseWindow::loop_detection() {
     for (int i = 0; i < candidates.size(); i++) {
       registration->setInputSource(candidates[i]->lock()->cloud);
 
-      pcl::PointCloud<pcl::PointXYZI>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZI>());
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZRGB>());
       Eigen::Isometry3d relative = source_pose.inverse() * candidates[i]->lock()->node->estimate();
       registration->align(*aligned, relative.matrix().cast<float>());
 

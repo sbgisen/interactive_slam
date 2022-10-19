@@ -139,14 +139,14 @@ void EdgeRefinementWindow::refinement() {
 
   double fitness_score_before = InformationMatrixCalculator::calc_fitness_score(v1->second->cloud, v2->second->cloud, edge.edge->measurement(), 2.0);
 
-  pcl::Registration<pcl::PointXYZI, pcl::PointXYZI>::Ptr registration = registration_method.method();
+  pcl::Registration<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr registration = registration_method.method();
 
   Eigen::Isometry3d relative = v1->second->estimate().inverse() * v2->second->estimate();
 
   registration->setInputTarget(v1->second->cloud);
   registration->setInputSource(v2->second->cloud);
 
-  pcl::PointCloud<pcl::PointXYZI>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr aligned(new pcl::PointCloud<pcl::PointXYZRGB>());
   registration->align(*aligned, relative.matrix().cast<float>());
 
   relative.matrix() = registration->getFinalTransformation().cast<double>();
